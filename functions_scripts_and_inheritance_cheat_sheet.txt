@@ -1,10 +1,3 @@
-
-****************************************************************************************************************************************
-****************************************************************************************************************************************
-************************                                      DAY 1                                             ************************
-****************************************************************************************************************************************
-****************************************************************************************************************************************
-
 ********************************************************************************************************
 ********                                     Comments/Notes                                     ********
 ********************************************************************************************************
@@ -37,84 +30,42 @@ Types:
 	 	Ex: collect of whole numbers would be an array of integers where the type for all values in the collection (array) 
 	            are all integers
 		    
-
-********************************************************************************************************
-********                                 Denormalized vs. Normalized                            ********
-********************************************************************************************************
-	Denormalized - Generally storing all relevant information in each table/column fully, even if is considered redundant
-	Normalized - Efficiently organizing data so that shared values are defined in 1 location
-	
 	
 ********************************************************************************************************
-********                                     Selecting Data                                     ********
+********          Key Concept Review - Select Functions: Select and Aliasing                    ********
 ********************************************************************************************************
 	Select
 		SELECT * FROM <table>;        -- return all data (columns and rows) in the table
 		Examples: SELECT * FROM users;
 		          SELECT * FROM products;
-		
+	
+	
 	Aliasing 
 		Format: SELECT <column> AS col_alias FROM <table> AS table_alias; 
 	        	rename your columns and tables so you don't have to type out the full names 
 	        	NOTE: columns and tables alias names must start with a letter and cannot start with a number 
-		Example: SELECT address as addr FROM users u;
+		Examples: SELECT o.shipping_total AS total FROM orders o;
+		
+			SELECT o.shipping_total AS total 
+			FROM orders o
+			JOIN order_products op on op.order_id = o.id
+			JOIN cart_products cp on cp.product_id = op.product_id
 	
-
-********************************************************************************************************
-********                                   Limit and Order By                                   ********
-********************************************************************************************************	
-	Limit
-		Format: Limit # -- only return # rows
-		Example: SELECT * FROM products limit 10;
-	
-	ORDER BY
-		Format: Order by <column/value>     -- return results ordered by the indicated value. Must use raw column name, not alias
-			By default order by will return ascending, use 'desc' to return descending
-				Example: 
-					SELECT * FROM products
-					ORDER BY price desc;
-			
-			By Column Number: You can refer the column number for the data you want to order on, 
-					  based on the order the columns are selected
-				Example:
-					SELECT id, price FROM products 
-					ORDER BY 2 -- will order by price since price is the 2nd column being selected
-					LIMIT 1;
-					
-			Nulls: Nulls can be specifically addressed after the rest of the order by statement
-				Example: 
-					SELECT * FROM orders 
-					ORDER BY status NULLS FIRST
-		
-		
-********************************************************************************************************
-********                                       Casting values                                   ********
-********************************************************************************************************
-Sometimes columns 'type' doesn't match what you're evaluating, for this use CAST
-	Format: CAST(<column/result> AS <type>)
-	Format: <column/result>::<type>
-		Note: By default cast will round for you
-	Examples:
-		SELECT CAST(order_total as int), order_total from orders;
-		
-		SELECT order_total::INT, order_total from orders;
-		
-		SELECT CAST(shipping_total AS int) as int_total, 
-		shipping_total::INTEGER as int_v2_total
-		FROM orders;
 	
 	
 ********************************************************************************************************
-********                                Unique Records & Grouping                               ********
+********          Key Concept Review - Select Functions: Unique Records & Grouping              ********
 ********************************************************************************************************
 	Unique records: Distinct and Group by 
 		Format - Group by: Group by <column/value>    -- will group identical rows into a single row. Must use raw column name, not alias
 		Format - Distinct: Distinct <column> -- will only select unique rows of data selected/returned, any duplicate rows are not returned.
 	Examples: 
 		SELECT product_type_id FROM products
-		GROUP BY product_type_id;
+		GROUP BY product_type_id
+		ORDER BY product_type_id;
 		
-		SELECT DISTINCT product_type_id FROM products;
+		SELECT DISTINCT product_type_id FROM products
+		ORDER BY product_type_id;
 	
 	Group By & column number reference: Refer to the columns selected by the order they are returned instead of the column itself
 		Example:
@@ -123,7 +74,7 @@ Sometimes columns 'type' doesn't match what you're evaluating, for this use CAST
 	
 	
 ********************************************************************************************************
-********                                     Aggregate functions                                ********
+********         Key Concept Review - Select Functions: Math/Aggregate functions               ********
 ********************************************************************************************************
 Aggregate functions 
 	Note: If you select any columns/values that are not aggregate functions, 
@@ -149,27 +100,29 @@ Aggregate functions
 		Format: MAX(<column/value>), MIN(<column/value>)
 		Example
 		
-	Examples:
-		Select AVG(price) as avg_price,
-		SUM(price) as total_cost,
-		COUNT(price) as total_products,
-		MIN(price) as least_cost,
-		MAX(price) as most_cost
-		FROM products; 
+	Example:
+		SELECT SUM(shipping_total) as shipping_total, 
+		COUNT(*) as total_orders, 
+		AVG(order_total) as avg_order,
+		EXTRACT(MONTH FROM TIMESTAMP created_at) as month, 
+		EXTRACT(YEAR FROM TIMESTAMP created_at) as year
+		FROM orders
+		ORDER BY year, month;
 		
 		Group by example: When you select non-aggregate columns/values - Get the results by user_id
-		Select AVG(price) as avg_price,
-		SUM(price) as total_cost,
-		COUNT(price) as total_products,
-		MIN(price) as least_cost,
-		MAX(price) as most_cost,
+		SELECT SUM(shipping_total) as shipping_total, 
+		COUNT(*) as total_orders, 
+		AVG(order_total) as avg_order,
+		EXTRACT(MONTH FROM TIMESTAMP created_at) as month, 
+		EXTRACT(YEAR FROM TIMESTAMP created_at) as year,
 		user_id
-		FROM products
+		FROM orders
+		ORDER BY year, month
 		GROUP BY user_id;
 
 
 ********************************************************************************************************
-********                                    Date Select Functions                               ********
+********          Key Concept Review - Select Functions:  Date Select Functions                 ********
 ********************************************************************************************************
 	EXTRACT(Value From <date/timestamp>)
       	Examples:
@@ -189,6 +142,32 @@ Aggregate functions
 		GROUP BY year, month, week
 		ORDER BY year, month, week; 
 
+
+		
+********************************************************************************************************
+********                  Key Concept Review - Casting values                                   ********
+********************************************************************************************************
+Sometimes columns 'type' doesn't match what you're evaluating, for this use CAST
+	Format: CAST(<column/result> AS <type>)
+	Format: <column/result>::<type>
+		Note: By default cast will round for you
+	Examples:
+		SELECT CAST(order_total as int), order_total from orders;
+		
+		SELECT order_total::INT, order_total from orders;
+		
+		SELECT CAST(shipping_total AS int) as int_total, 
+		shipping_total::INTEGER as int_v2_total
+		FROM orders;
+		
+		
+
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+************************                             KEY CONCEPTS NOT REVIEWED IN CLASS                         ************************
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+	
 
 ********************************************************************************************************
 ********                                        Filtering                                       ********
@@ -331,34 +310,26 @@ Aggregate functions
 		SELECT * FROM orders 
 		WHERE created_at >= (now() - interval '1 month')
 
-
-****************************************************************************************************************************************
-****************************************************************************************************************************************
-************************                                      DAY 2                                             ************************
-****************************************************************************************************************************************
-****************************************************************************************************************************************
-
-
 ********************************************************************************************************
 ********                                    Set Operators                                       ********
 ********************************************************************************************************
-Union - return the unique set of rows unioned together. Columns of results being united must match
-Example: 
-	SELECT product_id from order_products
-	UNION
-	SELECT product_id from cart_products
+	Union - return the unique set of rows unioned together. Columns of results being united must match
+	Example: 
+		SELECT product_id from order_products
+		UNION
+		SELECT product_id from cart_products
 
-Intersect - return the unique set of rows in the primary results AND in the secondary results
-Example:  get products that are currently in a cart and have been ordered 
-	SELECT product_id  from order_products
-	INTERSECT
-	SELECT product_id from cart_products
+	Intersect - return the unique set of rows in the primary results AND in the secondary results
+	Example:  get products that are currently in a cart and have been ordered 
+		SELECT product_id  from order_products
+		INTERSECT
+		SELECT product_id from cart_products
 
-Except - return the unique set of rows in the primary results NOT in the secondary results
-Example: products not currently in any carts
-	SELECT id as product_id FROM products
-	EXCEPT
-	SELECT product_id FROM cart_products
+	Except - return the unique set of rows in the primary results NOT in the secondary results
+	Example: products not currently in any carts
+		SELECT id as product_id FROM products
+		EXCEPT
+		SELECT product_id FROM cart_products
 
 
 ********************************************************************************************************
@@ -448,3 +419,237 @@ Create Table
 	
 	select * from special_partner_products;
 
+
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+************************                           ADVANCED Built-in FUNCTIONS                                  ************************
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+	
+	
+********************************************************************************************************
+********                            Having vs. Where                                            ********
+********************************************************************************************************
+This won't run because aggregate functions can't be in where clause: 
+	Select product_id, count(*) from order_products
+	WHERE count(*) > 2
+	GROUP BY product_id
+	ORDER BY count desc
+
+Instead using having:
+	Select product_id, count(*) from order_products
+	GROUP BY product_id
+	HAVING count(*) > 2
+	ORDER BY count(*) desc
+
+
+********************************************************************************************************
+********                            Concatenate Text                                            ********
+********************************************************************************************************
+	Format: Select <thing to put first> || <thing2> || ... AS some_column FROM <table>;
+	
+	Example:
+		SELECT 'add text: ' || name as new_name FROM products;
+
+
+********************************************************************************************************
+********                          Random and Rounding                                           ********
+********************************************************************************************************
+	Returns a random value between 0 and 1: Select random();
+	Returns a random value between 0 and 10: Select random() * 10;
+	
+	round - Round to the nearest whole number
+	floor - always round down to previous whole number
+	ceiling - always round up to next whole number
+	
+	Example: 
+		SELECT random() * 10, 
+		round(random() * 10), 
+		floor(random() * 10),
+		ceiling(random() * 10)
+		
+
+
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+************************                                 CUSTOM FUNCTIONS                                       ************************
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+
+	
+********************************************************************************************************
+********                              Functions: Overview                                      ********
+********************************************************************************************************
+SQL Function:
+	CREATE FUNCTION <function_name>() 
+	RETURNS <data type of result returned>
+	AS 'query'
+	-- will only use SQL or plpgsql functions
+	LANGUAGE SQL
+	-- define if the query will interact with tables/random
+	<IMMUTABLE/STABLE/VOLATILE>;
+
+	CREATE FUNCTION <function_name>() 
+	RETURNS <data type of result returned>
+	AS $$ BEGIN
+	RETURN <plpgsql statement>
+	END $$
+	LANGUAGE 'plpgsql'
+	-- query will interact with the DB
+	<IMMUTABLE/STABLE/VOLATILE>;
+
+	IMMUTABLE - function cannot alter or read from database
+	STABLE    - function may read from the database, but not alter it
+	VOLATILE  - function read from database may change within the function: 
+		Ex: Use of these w/in a query: random(), currval(), timeofday()
+
+
+	
+********************************************************************************************************
+********                               Immutable Functions                                      ********
+********************************************************************************************************
+	CREATE FUNCTION test_text()
+	RETURNS TEXT
+	AS 'SELECT ''some text'' ;'
+	LANGUAGE SQL
+	-- query won't alter or read from the database
+	IMMUTABLE
+	;
+
+	CREATE FUNCTION hundred() 
+	RETURNS INTEGER
+	AS 'SELECT 100;'
+	LANGUAGE SQL
+	-- query won't alter or read from the database
+	IMMUTABLE;
+
+	CREATE FUNCTION hundred() 
+	RETURNS INTEGER
+	AS $$ BEGIN
+	RETURN (100)
+	END $$
+	LANGUAGE 'plpgsql'
+	IMMUTABLE; -- query won't alter or read from the db
+
+
+	
+********************************************************************************************************
+********                               Stable Functions                                        ********
+********************************************************************************************************
+	CREATE FUNCTION now_with_timezone() 
+	RETURNS timestamp
+	AS $$ BEGIN
+	RETURN now::timestamp with timezone
+	END $$
+	LANGUAGE 'plpgsql'
+	-- query will interact with the DB
+	STABLE;
+	
+	CREATE FUNCTION now_with_timezone() 
+	RETURNS timestamp
+	AS 'SELECT now::timestamp with timezone'
+	LANGUAGE SQL
+	-- query will interact with the DB
+	STABLE;
+
+********************************************************************************************************
+********                               Volatile Functions                                       ********
+********************************************************************************************************
+	CREATE FUNCTION random_to_5() 
+	RETURNS float
+	AS 'SELECT random()  * 2' 
+	LANGUAGE SQL
+	VOLATILE; -- random could change w/in query
+
+	CREATE FUNCTION random_to_2() 
+	RETURNS float
+	AS $$ BEGIN 
+	(random()  * 2)
+	END $$
+	LANGUAGE 'pgplsql'
+	VOLATILE; -- random could change w/in query
+
+	CREATE FUNCTION random_date_next_month() 
+	RETURNS date
+	AS $$ BEGIN
+	RETURN (now() + (floor(random()*30) * interval '1 day')::DATE);
+	END $$
+	LANGUAGE SQL
+	VOLATILE; -- random could change w/in query
+
+
+
+********************************************************************************************************
+********                              Functions: variables                                      ********
+********************************************************************************************************
+	Format: 
+		CREATE FUNCTION <function_name>(<data_type>, …) 
+		RETURNS <data type of result>
+		AS <'query'/plpg statement>
+		LANGUAGE <SQL/'pgplsql'>
+		<IMMUTABLE/STABLE>;
+
+	CREATE FUNCTION sample(text, text, integer, integer) 
+	RETURNS text
+	AS 'SELECT $1 || $2 || $3 || $4;'
+	LANGUAGE SQL
+	IMMUTABLE;
+	SELECT sample('first', 'second', 3, 4);
+
+	CREATE FUNCTION addition(integer, integer)
+	RETURNS integer
+	AS 'SELECT $1 + $2;'
+	LANGUAGE SQL
+	IMMUTABLE; -- query won't use DB
+
+	CREATE OR REPLACE FUNCTION year_week() 
+	RETURNS text AS 'SELECT EXTRACT(YEAR from now()) || ''_'' || EXTRACT(WEEK from now());'
+	LANGUAGE SQL
+	STABLE;
+
+
+
+********************************************************************************************************
+********                                     Scripts                                            ********
+********************************************************************************************************
+	CREATE OR REPLACE FUNCTION product_detail_tablename() 
+	RETURNS text
+	AS 'SELECT ''product_detail_'' || 
+	EXTRACT(YEAR from now()) ||  ''_'' || EXTRACT(WEEK from now());'
+	LANGUAGE SQL
+	STABLE;
+	DO $$ BEGIN
+	    EXECUTE 'DROP TABLE IF EXISTS ' || product_detail_tablename() ||
+	    '; CREATE TABLE ' || product_detail_tablename() || ' AS
+	    SELECT products.id as product_id, 
+		products.price, 
+		products.grams, 
+		products.name as product, 
+		cart_products.cart_id, 
+		cart_products.created_at as cart_added_at,
+		now() as snapshot_date
+	    FROM cart_products
+	    JOIN products on products.id = cart_products.product_id;';
+	END $$;
+
+
+********************************************************************************************************
+********                                     Schemas                                            ********
+********************************************************************************************************
+
+	CREATE SCHEMA historical_cart_details;
+
+	CREATE TABLE historical_cart_details.test_table INHERITS(cart_details)
+
+	SELECT * FROM historical_cart_details.test_table
+
+	INSERT INTO historical_cart_details.test_table 
+	(SELECT products.id as product_id, 
+		products.price, 
+		products.grams, 
+		products.name as product, 
+		cart_products.cart_id, 
+		cart_products.created_at as cart_added_at,
+		now()::DATE as snapshot_date
+	    FROM cart_products
+	    JOIN products on products.id = cart_products.product_id);
