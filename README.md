@@ -1,0 +1,1 @@
+# PostgreSQL_func_script_inheritance
